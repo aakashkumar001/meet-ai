@@ -1,13 +1,20 @@
-"use client"
-import { Button } from "@/components/ui/button";
-import { authClient } from "@/lib/auth-client";
+import { auth } from "@/lib/auth";
+import { HomeView } from "@/modules/home/ui/views/home-view"
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 
-export default function Home() {
+const Page = async () => {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  })
 
+  if(!session){
+    redirect("/sign-in")
+  }
 
   return (
-    <div className="">
-      <h1 className="text-3xl font-bold text-green-700">Meet AI</h1>
-    </div>
-  );
+    <HomeView/>
+  )
 }
+
+export default Page;
