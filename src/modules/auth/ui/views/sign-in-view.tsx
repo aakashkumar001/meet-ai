@@ -14,6 +14,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { authClient } from "@/lib/auth-client";
+import { FaGithub, FaGoogle } from "react-icons/fa";
 
 const formSchema = z.object({
   email: z.string().email(),
@@ -128,17 +129,29 @@ export const SignInView = () => {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                        <Button
+                         onClick={() => {
+                          authClient.signIn.social({
+                            provider:"google",
+                          })
+                         }}
                          variant="outline"
                          type="button"
                          className="w-full"
                        >
+                        <FaGoogle/>
                          Google
                        </Button>
                          <Button
+                          onClick={() => {
+                          authClient.signIn.social({
+                            provider:"github",
+                          })
+                         }}
                          variant="outline"
                          type="button"
                          className="w-full"
                        >
+                        <FaGithub/>
                          Github
                        </Button>
                 </div>
