@@ -1,3 +1,6 @@
+"use client";
+
+
 import { ErrorState } from "@/components/error-state";
 import { LoadingState } from "@/components/loading-state";
 import { useTRPC } from "@/trpc/client";
@@ -11,7 +14,9 @@ export const AgentsView = () => {
 
 
   return (
-  <div>{JSON.stringify(data, null, 2)}</div>
+  <div>
+    {JSON.stringify(data, null, 2)}
+  </div>
   )
 };
 
