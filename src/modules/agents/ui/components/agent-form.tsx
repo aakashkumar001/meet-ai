@@ -31,7 +31,7 @@ export const AgentForm = ({
     trpc.agents.create.mutationOptions({
         onSuccess:async () => {
             await queryClient.invalidateQueries(
-                trpc.agents.getMany.queryOptions(),
+                trpc.agents.getMany.queryOptions({}),
             );
 
             if(initialValues?.id) {
@@ -51,7 +51,7 @@ export const AgentForm = ({
     resolver:zodResolver(agentsInsertSchema),
     defaultValues:{
         name:initialValues?.name ?? "",
-        instruction:initialValues?.instructions ?? "",
+        instructions:initialValues?.instructions ?? "",
     }
   })
 
@@ -89,7 +89,7 @@ export const AgentForm = ({
             )}
            />
            <FormField 
-            name="instruction"
+            name="instructions"
             control={form.control}
             render={({field}) => (
                 <FormItem>

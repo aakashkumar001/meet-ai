@@ -24,7 +24,7 @@ export const columns: ColumnDef<AgentGetOne>[] = [
             <div className="flex items-center gap-x-2">
                     <CornerRightDown className="size-3 text-muted-foreground"/>
                     <span className="text-sm text-muted-foreground max-w-[200px] truncate capitalize">
-                        {row.original.instructions}
+                        {row.original.meetingCount} {row.original.meetingCount === 1 ? "meeting" : "meetings"}
                     </span>
             </div>
         </div>
