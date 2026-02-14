@@ -1,8 +1,8 @@
 import { db } from "@/db";
-import { meeting } from "@/db/schema";
+import { agents, meeting } from "@/db/schema";
 import { createTRPCRouter, protectedProcedure } from "@/trpc/init";
 import { z } from "zod";
-import { and, count, desc, eq, getTableColumns, ilike} from "drizzle-orm";
+import { and, count, desc, eq, getTableColumns, ilike, sql} from "drizzle-orm";
 import {
   DEFAULT_PAGE,
   DEFAULT_PAGE_SIZE,
@@ -11,6 +11,7 @@ import {
 } from "@/constants";
 import { TRPCError } from "@trpc/server";
 import { meetingsInsertSchema, meetingsUpdateSchema } from "../schema";
+import { MeetingStatus } from "../types";
 
 export const meetingsRouter = createTRPCRouter({
   create: protectedProcedure
@@ -75,19 +76,32 @@ export const meetingsRouter = createTRPCRouter({
           .max(MAX_PAGE_SIZE)
           .default(DEFAULT_PAGE_SIZE),
         search: z.string().nullish(),
+        agentId:z.string().nullish(),
+        status:z.enum([
+          MeetingStatus.Upcoming,
+          MeetingStatus.Active,
+          MeetingStatus.Completed,
+          MeetingStatus.Processing,
+          MeetingStatus.Cancelled,
+        ]).nullish(),
       }),
     )
     .query(async ({ ctx, input }) => {
-      const { search, page, pageSize } = input;
+      const { search, page, pageSize, status, agentId } = input;
       const data = await db
         .select({
           ...getTableColumns(meeting),
+          agent:agents,
+          duration:sql<number>`EXTRACT(EPOCH FROM (ended_at - started_at))`.as("duartion"),
         })
         .from(meeting)
+        .innerJoin(agents,eq(meeting.agentId, agents.id))
         .where(
           and(
             eq(meeting.userId, ctx.auth.user.id),
             search ? ilike(meeting.name, `%${search}%`) : undefined,
+            status ? eq(meeting.status, status) : undefined,
+            agentId ? eq(meeting.agentId, agentId) : undefined,
           ),
         )
         .orderBy(desc(meeting.createdAt), desc(meeting.id))
@@ -97,10 +111,13 @@ export const meetingsRouter = createTRPCRouter({
       const [total] = await db
         .select({ count: count() })
         .from(meeting)
+        .innerJoin(agents,eq(meeting.agentId, agents.id))
         .where(
           and(
             eq(meeting.userId, ctx.auth.user.id),
             search ? ilike(meeting.name, `%${search}%`) : undefined,
+            status ? eq(meeting.status, status) : undefined,
+            agentId ? eq(meeting.agentId, agentId) : undefined,
           ),
         );
 
